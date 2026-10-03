@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Outcome Prediction System | Sports Analytics</title>
+  <meta name="description" content="Sports Analytics using Logistic Regression and Random Forest. Real-time match outcome prediction based on trained machine learning models.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for Model Comparison -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+            <path d="M2 12h20"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">MATCH OUTCOME PREDICTION SYSTEM</h1>
+          <p class="brand-subtitle">Sports Analytics using Logistic Regression and Random Forest</p>
+        </div>
+      </div>
+      
+      <nav class="nav-links">
+        <a href="#home" class="nav-item active" id="nav-home">Home</a>
+        <a href="#prediction-section" class="nav-item" id="nav-predict">Predict Match</a>
+        <a href="#results-section" class="nav-item" id="nav-results">Prediction Results</a>
+        <a href="#comparison-section" class="nav-item" id="nav-comparison">Model Comparison</a>
+        <a href="#dataset-section" class="nav-item" id="nav-dataset">Dataset Overview</a>
+        <a href="#about-section" class="nav-item" id="nav-about">About Project</a>
+      </nav>
+
+      <div class="header-status">
+        <span class="status-indicator" id="api-status-dot"></span>
+        <span class="status-text" id="api-status-text">Backend Connected</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-content">
+    
+    <!-- 1. HOME / DASHBOARD HERO -->
+    <section id="home" class="section hero-section">
+      <div class="hero-card">
+        <div class="hero-badge">SPORTS ANALYTICS PLATFORM</div>
+        <h2 class="hero-title">Predict Match Outcomes with Machine Learning</h2>
+        <p class="hero-description">
+          Analyze team performance, scoring statistics, player performance and venue information to generate data-driven match outcome predictions.
+        </p>
+        
+        <div class="hero-actions">
+          <a href="#prediction-section" class="btn btn-primary" id="btn-hero-predict">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Start Prediction
+          </a>
+          <a href="#comparison-section" class="btn btn-secondary" id="btn-hero-compare">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            View Model Performance
+          </a>
+        </div>
+
+        <!-- Hero Stats Row -->
+        <div class="hero-stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-matches">20+</div>
+            <div class="stat-label">Matches Analyzed</div>
+            <div class="stat-sub">Historical sample match database</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-models">2</div>
+            <div class="stat-label">ML Models</div>
+            <div class="stat-sub">Logistic Regression & Random Forest</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-attributes">13</div>
+            <div class="stat-label">Dataset Attributes</div>
+            <div class="stat-sub">Team, performance & venue statistics</div>
+          </div>
+          <div class="stat-card highlight-stat">
+            <div class="stat-value" id="stat-features">47</div>
+            <div class="stat-label">Engineered Model Features</div>
+            <div class="stat-sub">One-hot categorical + scaled vectors</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MATCH PREDICTION SECTION -->
+    <section id="prediction-section" class="section">
+      <div class="section-header">
+        <div class="section-tag">INPUT DATA</div>
+        <h2 class="section-title">Match Prediction</h2>
+        <p class="section-subtitle">Select competing teams, venue, and detailed statistical metrics to compute dual-model predictions.</p>
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div class="preset-container">
+        <span class="preset-label">Quick Sample Presets:</span>
+        <div class="preset-buttons">
+          <button type="button" class="preset-btn" id="preset-1" data-preset="0">Sample Match 1: Team A vs Team B (Home)</button>
+          <button type="button" class="preset-btn" id="preset-2" data-preset="1">Sample Match 2: Team C vs Team D (Away)</button>
+          <button type="button" class="preset-btn" id="preset-3" data-preset="2">Sample Match 3: Team E vs Team F (Home)</button>
+          <button type="button" class="preset-btn" id="preset-4" data-preset="3">Sample Match 4: Team G vs Team H (Neutral)</button>
+        </div>
+      </div>
+
+      <!-- Form Error / Warning Banner -->
+      <div class="alert-banner hidden" id="form-alert"></div>
+
+      <form id="prediction-form" class="prediction-form" novalidate>
+        
+        <!-- Match Setup Grid -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <div class="section-num">01</div>
+            <div>
+              <h3 class="form-section-title">Match Setup & Venue</h3>
+              <p class="form-section-desc">Select distinct competing teams and match environment</p>
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label for="team-a-select" class="form-label">
+                Team A <span class="required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select id="team-a-select" name="team_a" class="form-control" required>
+                  <option value="" disabled>Loading teams...</option>
+                </select>
+              </div>
+              <span class="field-hint">Designated Home / Team A</span>
+            </div>
+
+            <div class="form-group">
+              <label for="team-b-select" class="form-label">
+                Team B <span class="required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select id="team-b-select" name="team_b" class="form-control" required>
+                  <option value="" disabled>Loading teams...</option>
+                </select>
+              </div>
+              <span class="field-hint">Designated Opponent</span>
+            </div>
+
+            <div class="form-group">
+              <label for="venue-select" class="form-label">
+                Venue <span class="required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select id="venue-select" name="venue" class="form-control" required>
+                  <option value="" disabled>Loading venues...</option>
+                </select>
+              </div>
+              <span class="field-hint">Match location context</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Columns: Team A Stats vs Team B Stats -->
+        <div class="teams-stats-grid">
+          
+          <!-- Team A Metrics Card -->
+          <div class="form-section-card team-card-accent-a">
+            <div class="form-section-header">
+              <div class="section-num accent-a">A</div>
+              <div>
+                <h3 class="form-section-title">Team A Performance Metrics</h3>
+                <p class="form-section-desc">Historical scoring and efficiency parameters</p>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="team-a-avg-score" class="form-label">Team A Average Score</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="200" id="team-a-avg-score" name="team_a_avg_score" class="form-control" value="78" required>
+                  <span class="input-unit">pts</span>
+                </div>
+                <span class="field-hint">Typical score range: 50 - 100</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-a-win-rate" class="form-label">Team A Win Rate</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="100" id="team-a-win-rate" name="team_a_win_rate" class="form-control" value="65" required>
+                  <span class="input-unit">%</span>
+                </div>
+                <span class="field-hint">Season win percentage (0 - 100)</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-a-avg-goals" class="form-label">Team A Average Goals</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="50" id="team-a-avg-goals" name="team_a_avg_goals" class="form-control" value="12" required>
+                  <span class="input-unit">goals</span>
+                </div>
+                <span class="field-hint">Average scoring actions per game</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-a-player-performance" class="form-label">Team A Player Performance</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="100" id="team-a-player-performance" name="team_a_player_performance" class="form-control" value="62" required>
+                  <span class="input-unit">index</span>
+                </div>
+                <span class="field-hint">Composite squad index (0 - 100)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team B Metrics Card -->
+          <div class="form-section-card team-card-accent-b">
+            <div class="form-section-header">
+              <div class="section-num accent-b">B</div>
+              <div>
+                <h3 class="form-section-title">Team B Performance Metrics</h3>
+                <p class="form-section-desc">Historical scoring and efficiency parameters</p>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="team-b-avg-score" class="form-label">Team B Average Score</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="200" id="team-b-avg-score" name="team_b_avg_score" class="form-control" value="72" required>
+                  <span class="input-unit">pts</span>
+                </div>
+                <span class="field-hint">Typical score range: 50 - 100</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-b-win-rate" class="form-label">Team B Win Rate</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="100" id="team-b-win-rate" name="team_b_win_rate" class="form-control" value="58" required>
+                  <span class="input-unit">%</span>
+                </div>
+                <span class="field-hint">Season win percentage (0 - 100)</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-b-avg-goals" class="form-label">Team B Average Goals</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="50" id="team-b-avg-goals" name="team_b_avg_goals" class="form-control" value="8" required>
+                  <span class="input-unit">goals</span>
+                </div>
+                <span class="field-hint">Average scoring actions per game</span>
+              </div>
+
+              <div class="form-group">
+                <label for="team-b-player-performance" class="form-label">Team B Player Performance</label>
+                <div class="input-wrapper">
+                  <input type="number" step="0.1" min="0" max="100" id="team-b-player-performance" name="team_b_player_performance" class="form-control" value="55" required>
+                  <span class="input-unit">index</span>
+                </div>
+                <span class="field-hint">Composite squad index (0 - 100)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Submit Button and Loader -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-predict" id="predict-btn">
+            <span class="btn-text">Predict Match Outcome</span>
+            <div class="spinner hidden" id="predict-spinner"></div>
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- 3. PREDICTION RESULTS SECTION -->
+    <section id="results-section" class="section">
+      <div class="section-header">
+        <div class="section-tag">INFERENCE RESULTS</div>
+        <h2 class="section-title">Prediction Results</h2>
+        <p class="section-subtitle">Real-time outcome probabilities calculated by both trained machine learning architectures.</p>
+      </div>
+
+      <!-- Placeholder before any prediction is run -->
+      <div id="results-placeholder" class="results-placeholder-card">
+        <div class="placeholder-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <h3>No Prediction Generated Yet</h3>
+        <p>Complete the match parameters form above and click "Predict Match Outcome" to view predictions from Logistic Regression and Random Forest.</p>
+        <button type="button" class="btn btn-outline" id="load-initial-demo-btn">Load Demo Match & Predict</button>
+      </div>
+
+      <!-- Actual Results Container (hidden initially) -->
+      <div id="results-content" class="results-container hidden">
+        
+        <!-- Summary Match Banner -->
+        <div class="match-summary-banner" id="match-summary-banner">
+          <div class="match-teams-display">
+            <span class="match-team a" id="res-team-a-name">Team A</span>
+            <span class="match-vs">VS</span>
+            <span class="match-team b" id="res-team-b-name">Team B</span>
+          </div>
+          <div class="match-venue-pill" id="res-venue-pill">Venue: Home</div>
+        </div>
+
+        <!-- Two Large Model Cards -->
+        <div class="model-cards-grid">
+          
+          <!-- Card 1: Logistic Regression -->
+          <div class="model-result-card" id="lr-card">
+            <div class="model-card-header">
+              <div>
+                <span class="model-type-badge">LINEAR CLASSIFIER</span>
+                <h3 class="model-card-title">LOGISTIC REGRESSION</h3>
+              </div>
+              <div class="model-meta-pill">StandardScaler (47 features)</div>
+            </div>
+
+            <div class="prediction-outcome-wrapper">
+              <div class="outcome-label">Prediction</div>
+              <div class="outcome-badge" id="lr-prediction-badge">TEAM A WINS</div>
+              <div class="predicted-winner-text" id="lr-winner-text">Predicted Winner: Team A</div>
+            </div>
+
+            <div class="probabilities-container">
+              <!-- Win Probability -->
+              <div class="prob-row">
+                <div class="prob-info">
+                  <span class="prob-name">Team A Win Probability</span>
+                  <span class="prob-percentage" id="lr-win-pct">96.62%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-win" id="lr-win-bar" style="width: 96.62%;"></div>
+                </div>
+              </div>
+
+              <!-- Loss Probability -->
+              <div class="prob-row">
+                <div class="prob-info">
+                  <span class="prob-name">Team A Loss Probability</span>
+                  <span class="prob-percentage" id="lr-loss-pct">3.38%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-loss" id="lr-loss-bar" style="width: 3.38%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="model-card-footer">
+              <span class="footer-note">Based on hyperplane distance with sigmoid mapping</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Random Forest -->
+          <div class="model-result-card" id="rf-card">
+            <div class="model-card-header">
+              <div>
+                <span class="model-type-badge">ENSEMBLE CLASSIFIER</span>
+                <h3 class="model-card-title">RANDOM FOREST</h3>
+              </div>
+              <div class="model-meta-pill">200 Estimators (Trees)</div>
+            </div>
+
+            <div class="prediction-outcome-wrapper">
+              <div class="outcome-label">Prediction</div>
+              <div class="outcome-badge" id="rf-prediction-badge">TEAM A WINS</div>
+              <div class="predicted-winner-text" id="rf-winner-text">Predicted Winner: Team A</div>
+            </div>
+
+            <div class="probabilities-container">
+              <!-- Win Probability -->
+              <div class="prob-row">
+                <div class="prob-info">
+                  <span class="prob-name">Team A Win Probability</span>
+                  <span class="prob-percentage" id="rf-win-pct">100.00%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-win" id="rf-win-bar" style="width: 100%;"></div>
+                </div>
+              </div>
+
+              <!-- Loss Probability -->
+              <div class="prob-row">
+                <div class="prob-info">
+                  <span class="prob-name">Team A Loss Probability</span>
+                  <span class="prob-percentage" id="rf-loss-pct">0.00%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-loss" id="rf-loss-bar" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="model-card-footer">
+              <span class="footer-note">Aggregated voting over 200 non-linear decision trees</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Combined Comparison Section -->
+        <div class="combined-comparison-card">
+          <div class="combined-header">
+            <div>
+              <h3 class="combined-title">Model Agreement & Synthesis</h3>
+              <p class="combined-subtitle">Side-by-side consensus analysis between linear and non-linear learners</p>
+            </div>
+            <div class="consensus-badge" id="consensus-badge">CONSENSUS: FULL AGREEMENT</div>
+          </div>
+
+          <div class="comparison-summary-grid">
+            <div class="summary-metric-box">
+              <div class="metric-label">Logistic Regression Probability</div>
+              <div class="metric-val" id="summary-lr-val">96.62% Win</div>
+            </div>
+            <div class="summary-metric-box">
+              <div class="metric-label">Random Forest Probability</div>
+              <div class="metric-val" id="summary-rf-val">100.00% Win</div>
+            </div>
+            <div class="summary-metric-box">
+              <div class="metric-label">Average Ensemble Probability</div>
+              <div class="metric-val" id="summary-avg-val">98.31% Win</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. MODEL COMPARISON SECTION -->
+    <section id="comparison-section" class="section">
+      <div class="section-header">
+        <div class="section-tag">BENCHMARK PERFORMANCE</div>
+        <h2 class="section-title">Model Comparison</h2>
+        <p class="section-subtitle">Official evaluation metrics from the trained models evaluated on the test set (<code class="inline-code">model_comparison_results.csv</code>).</p>
+      </div>
+
+      <div class="comparison-content-grid">
+        <!-- Table Card -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Test Set Evaluation Metrics</h3>
+          <p class="card-desc">Computed using Scikit-learn test evaluation metrics without approximation.</p>
+          
+          <div class="table-responsive">
+            <table class="styled-table" id="comparison-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Accuracy</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1 Score</th>
+                </tr>
+              </thead>
+              <tbody id="comparison-tbody">
+                <!-- Dynamically loaded from model_comparison_results.csv -->
+                <tr><td colspan="5" class="text-center">Loading evaluation results...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="metrics-highlights">
+            <div class="metric-pill highlight-pill">
+              <span class="pill-title">Logistic Regression</span>
+              <span class="pill-value">100.0% Accuracy & F1</span>
+            </div>
+            <div class="metric-pill">
+              <span class="pill-title">Random Forest</span>
+              <span class="pill-value">75.0% Accuracy & 100.0% Precision</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Performance Comparison Chart</h3>
+          <p class="card-desc">Comparative radar & bar metrics across Accuracy, Precision, Recall, and F1 Score.</p>
+          
+          <div class="chart-wrapper">
+            <canvas id="modelComparisonChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Importance Card -->
+      <div class="dashboard-card feature-importance-card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="card-title">Random Forest Feature Importance</h3>
+            <p class="card-desc">Top predictive signals driving match outcome classifications across 200 decision trees.</p>
+          </div>
+          <span class="badge-feature-count">Top 8 Features</span>
+        </div>
+        <div class="features-bars-container" id="features-importance-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. DATASET OVERVIEW SECTION -->
+    <section id="dataset-section" class="section">
+      <div class="section-header">
+        <div class="section-tag">DATA REPOSITORY</div>
+        <h2 class="section-title">Dataset Overview</h2>
+        <p class="section-subtitle">Real dataset records from <code class="inline-code">match_outcome_sample_dataset.csv</code> including match stats and targets.</p>
+      </div>
+
+      <!-- Dataset Stats Cards -->
+      <div class="dataset-stats-grid">
+        <div class="dstat-card">
+          <div class="dstat-num" id="dset-total-matches">20</div>
+          <div class="dstat-title">Total Matches</div>
+        </div>
+        <div class="dstat-card">
+          <div class="dstat-num" id="dset-total-features">13</div>
+          <div class="dstat-title">Total Attributes</div>
+        </div>
+        <div class="dstat-card">
+          <div class="dstat-num" id="dset-num-teams">20</div>
+          <div class="dstat-title">Unique Teams</div>
+        </div>
+        <div class="dstat-card">
+          <div class="dstat-num" id="dset-num-venues">3</div>
+          <div class="dstat-title">Unique Venues</div>
+        </div>
+      </div>
+
+      <!-- Dataset Table Card with Search -->
+      <div class="dashboard-card">
+        <div class="table-toolbar">
+          <div class="toolbar-title">
+            <h3>Sample Match Dataset</h3>
+            <span class="count-badge" id="table-row-count">Showing 20 of 20 matches</span>
+          </div>
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="dataset-search" placeholder="Search by team, venue, winner..." class="search-input">
+          </div>
+        </div>
+
+        <div class="table-responsive dataset-table-wrap">
+          <table class="styled-table dataset-table" id="dataset-table">
+            <thead id="dataset-thead">
+              <!-- Dynamically populated -->
+            </thead>
+            <tbody id="dataset-tbody">
+              <!-- Dynamically populated -->
+              <tr><td colspan="13" class="text-center">Loading dataset rows...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. ABOUT PROJECT SECTION -->
+    <section id="about-section" class="section">
+      <div class="section-header">
+        <div class="section-tag">SPECIFICATION</div>
+        <h2 class="section-title">About Project</h2>
+        <p class="section-subtitle">Academic Sports Analytics & Machine Learning Engineering Documentation</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card main-about">
+          <h3 class="about-card-title">Project Overview</h3>
+          <div class="about-item">
+            <span class="about-label">Project Title:</span>
+            <span class="about-value highlight-value">Match Outcome Prediction Using Logistic Regression and Random Forest</span>
+          </div>
+          <div class="about-item">
+            <span class="about-label">Subtitle:</span>
+            <span class="about-value">Sports Analytics using Logistic Regression and Random Forest</span>
+          </div>
+          <div class="about-item">
+            <span class="about-label">Purpose:</span>
+            <p class="about-text">
+              Predict sports match outcomes using historical performance-related features, including scoring averages, seasonal win rates, goal scoring metrics, composite player performance indices, and home/away venue factors.
+            </p>
+          </div>
+          <div class="about-item">
+            <span class="about-label">Target Format:</span>
+            <div class="target-format-pills">
+              <span class="target-pill win">Target 1 = Team A Wins</span>
+              <span class="target-pill loss">Target 0 = Team A Loses</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <h3 class="about-card-title">Machine Learning Algorithms</h3>
+          <div class="algo-list">
+            <div class="algo-item">
+              <div class="algo-name">Logistic Regression</div>
+              <p class="algo-desc">
+                Supervised linear classifier with StandardScaler preprocessing. Optimized with L2 regularization to find the optimal maximum-likelihood decision boundary across 47 dimensions.
+              </p>
+            </div>
+            <div class="algo-item">
+              <div class="algo-name">Random Forest Classifier</div>
+              <p class="algo-desc">
+                Non-linear ensemble learning technique aggregating 200 de-correlated decision trees. Leverages bootstrapping and random subspace feature selection for robust predictive variance reduction.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <h3 class="about-card-title">Core Technology Stack</h3>
+          <div class="tech-grid">
+            <div class="tech-badge">
+              <span class="tech-name">FastAPI & Uvicorn</span>
+              <span class="tech-role">Backend Server</span>
+            </div>
+            <div class="tech-badge">
+              <span class="tech-name">Scikit-learn</span>
+              <span class="tech-role">Model Inference</span>
+            </div>
+            <div class="tech-badge">
+              <span class="tech-name">Joblib</span>
+              <span class="tech-role">Model Serialization</span>
+            </div>
+            <div class="tech-badge">
+              <span class="tech-name">Pandas & NumPy</span>
+              <span class="tech-role">Data Preprocessing</span>
+            </div>
+            <div class="tech-badge">
+              <span class="tech-name">Matplotlib & Seaborn</span>
+              <span class="tech-role">Model Training & Visuals</span>
+            </div>
+            <div class="tech-badge">
+              <span class="tech-name">HTML5 / Vanilla CSS / JS</span>
+              <span class="tech-role">Modern Dashboard UI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <h3 class="about-card-title">Preprocessing & Feature Vector Architecture</h3>
+          <p class="about-text">
+            The trained inference pipeline translates raw match parameters into a 47-dimensional feature vector:
+          </p>
+          <ul class="feature-pipeline-list">
+            <li><strong>8 Numerical Metrics:</strong> Avg Score, Win Rate, Avg Goals, Player Performance (both teams)</li>
+            <li><strong>18 Team A One-Hot Columns:</strong> Filtered indicator variables with first-category baseline drop</li>
+            <li><strong>19 Team B One-Hot Columns:</strong> Opponent indicator variables with first-category baseline drop</li>
+            <li><strong>2 Venue One-Hot Columns:</strong> Home and Neutral venue indicators (Away as baseline)</li>
+            <li><strong>Feature Scaler:</strong> Applied strictly to Logistic Regression vector; raw DataFrame fed to Random Forest</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-title">MATCH OUTCOME PREDICTION SYSTEM</span>
+        <span class="footer-sub">Sports Analytics using Logistic Regression and Random Forest</span>
+      </div>
+      <div class="footer-info">
+        <span>Trained Artifacts Loaded from Local Repository</span>
+        <span class="footer-separator">•</span>
+        <span>FastAPI v1.0.0</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>
